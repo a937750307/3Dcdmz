@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D场地模组</title>
+<link rel="stylesheet" href="./styles.css">
+<script src="./vendor/legacy/three.min.js"></script>
+<script src="./vendor/legacy/OrbitControls.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="mark"></span><span>3D场地模组</span></div>
+  <div class="top-actions">
+    <button class="btn" id="btn-new">新建</button>
+    <button class="btn" id="btn-load">读取</button>
+    <button class="btn" id="btn-save">保存</button>
+    <button class="btn" id="btn-import">导入</button>
+    <button class="btn" id="btn-export-scene">导出方案</button>
+    <button class="btn primary" id="btn-export">导出效果图</button>
+    <input type="file" id="file-import" accept=".json,application/json" hidden>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="panel">
+    <section class="block">
+      <div class="block-head"><span>空间尺寸</span><span class="hint">单位 / m</span></div>
+      <div class="dim-row"><label>宽度</label><input type="range" id="dim-w" min="8" max="120" step="0.5" value="24"><input type="number" id="num-w" min="8" max="120" step="0.5" value="24"></div>
+      <div class="dim-row"><label>进深</label><input type="range" id="dim-d" min="8" max="100" step="0.5" value="16"><input type="number" id="num-d" min="8" max="100" step="0.5" value="16"></div>
+      <div class="dim-row"><label>层高</label><input type="range" id="dim-h" min="3" max="30" step="0.1" value="5"><input type="number" id="num-h" min="3" max="30" step="0.1" value="5"></div>
+      <div class="floor-row">
+        <label>地面</label>
+        <div class="swatches">
+          <button class="swatch active" data-floor="#d8d8d4" title="默认灰" style="--sw:#d8d8d4"></button>
+          <button class="swatch" data-floor="#f0efeb" title="暖白" style="--sw:#f0efeb"></button>
+          <button class="swatch" data-floor="#e6ddd0" title="米色" style="--sw:#e6ddd0"></button>
+          <button class="swatch" data-floor="#c7c9c6" title="中灰" style="--sw:#c7c9c6"></button>
+          <button class="swatch" data-floor="#9fa3a0" title="深灰" style="--sw:#9fa3a0"></button>
+        </div>
+        <input type="color" id="floor-color" value="#d8d8d4" title="自定义地面颜色">
+        <span class="val" id="floor-color-val">#D8D8D4</span>
+      </div>
+      <div class="prop-check space-check"><label><input type="checkbox" id="hide-walls">移除半透明空气墙</label></div>
+      <div class="prop-check space-check"><label><input type="checkbox" id="desaturate">去色</label></div>
+      <div class="prop-check space-check"><label><input type="checkbox" id="hide-grid">移除地面网格</label></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span>现成模板</span><span class="hint">一键套用</span></div>
+      <div class="tpl-grid" id="tpl-grid">
+        <button class="tpl" data-tpl="wedding">
+          <svg viewBox="0 0 120 50" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M34 34C34 14 86 14 86 34"/><path d="M34 34v8M86 34v8"/><path d="M60 42V28"/>
+            <path d="M47 46h26M49 44v4M55 44v4M61 44v4M67 44v4M73 44v4"/>
+            <circle cx="34" cy="13" r="2.5"/><circle cx="86" cy="13" r="2.5"/>
+          </svg>
+          <b>婚礼</b><small>T台 · 宴席 · 甜品台</small>
+        </button>
+        <button class="tpl active" data-tpl="launch">
+          <svg viewBox="0 0 120 50" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="18" y="12" width="84" height="18"/><path d="M18 30v6h84v-6"/>
+            <path d="M30 38h60M34 41v3M46 41v3M58 41v3M70 41v3M82 41v3"/>
+            <path d="M60 12V6M52 8l8 4 8-4"/>
+          </svg>
+          <b>新品发布会</b><small>舞台 · 大屏 · 桁架</small>
+        </button>
+        <button class="tpl" data-tpl="gallery">
+          <svg viewBox="0 0 120 50" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M20 10v30M20 25h28v15M68 10v30M68 25h30"/>
+            <rect x="28" y="13" width="10" height="9"/><rect x="78" y="13" width="10" height="9"/>
+            <path d="M45 42h10v-6M90 42h10v-6"/>
+          </svg>
+          <b>艺术展览</b><small>隔断 · 画框 · 展台</small>
+        </button>
+        <button class="tpl" data-tpl="gala">
+          <svg viewBox="0 0 120 50" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="16" y="9" width="88" height="13"/><path d="M16 22v5h88v-5"/>
+            <circle cx="38" cy="38" r="6"/><circle cx="60" cy="38" r="6"/><circle cx="82" cy="38" r="6"/>
+            <path d="M38 32v-3M60 32v-3M82 32v-3"/>
+          </svg>
+          <b>企业年会</b><small>圆桌 · 舞台 · 灯光</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span>属性</span><span class="hint">选中后编辑</span></div>
+      <div class="props" id="props"><div class="empty">点击场景或列表中的模组，调整尺寸与位置</div></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span>模组库</span><span class="hint">点击添加</span></div>
+      <div class="chips" id="chips"></div>
+      <div class="mod-grid" id="mod-grid"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span>场景模组</span><span class="hint" id="count">0 个</span></div>
+      <div class="list-tools">
+        <button class="btn mini" id="btn-group" disabled>组合</button>
+        <button class="btn mini" id="btn-ungroup" disabled>解散</button>
+        <span class="hint">Ctrl / ⌘ 点击多选</span>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+
+  </aside>
+
+  <section class="stage" id="stage">
+    <canvas id="scene"></canvas>
+    <div class="stage-top">
+      <div class="view-tabs">
+        <button class="active" data-view="persp">透视</button>
+        <button data-view="top">俯视</button>
+        <button data-view="front">正视</button>
+        <button class="preview-btn" id="btn-preview" title="预览模式：拖动画布不会移动物体">预览</button>
+      </div>
+      <div class="stage-meta" id="meta">30 × 22 × 6 m</div>
+    </div>
+    <div class="stage-bottom">
+      <span id="stage-hint">Ctrl 多选 · 拖拽移动 · 空白处旋转 · 滚轮缩放 · Delete 删除</span>
+      <button id="btn-reset">重置视角</button>
+    </div>
+    <div class="empty-tip hidden" id="empty-tip">从模板或模组库开始搭建你的场地</div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <span class="footer-note">本站内容仅供学习和交流，非商业用途</span>
+  <a class="footer-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2025187466号</a>
+  <a class="footer-link" href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33030402001483" target="_blank" rel="noopener noreferrer">
+    <img src="https://www.937788.xyz/gonganbeian.png" alt="公安备案">
+    <span>浙公网安备33030402001483号</span>
+  </a>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="./app.js"></script>
+</body>
+</html>
